@@ -1,6 +1,6 @@
 # SFND Radar Target Generation and Detection
 
-PUT AN IMAGE HERE
+![](https://www.mathworks.com/help/examples/phased/win64/xxFMCWExample_acc.png)
 
 ## Implementation Details
 ---
@@ -33,7 +33,7 @@ fc= 77e9;             %carrier freq
 ```
 
 #### 2. Simulation Loop
-Simulate Target movement and calculate the beat or mixed signal for every timestamp.
+Simulate Target movement and calculate the beat or mixed signal for every time step.
 
 ```Matlab
 %The number of chirps in one sequence.
@@ -106,7 +106,12 @@ subplot(2,1,1)
 plot(sig_fft);
 axis ([0 200 0 0.5]);
 ```
-![result](https://github.com/godloveliang/SFND-Radar-Target-Generation-and-Detection-/blob/master/img/range_FFT.png)
+
+| ![range_fft.png](figures/range_fft.png) | 
+|:--:| 
+| *Figure 1. Range FFT* |
+
+
 
 #### 4. Doppler FFT (2st FFT)
 
@@ -134,12 +139,14 @@ doppler_axis = linspace(-100,100,Nd);
 range_axis = linspace(-200,200,Nr/2)*((Nr/2)/400);
 figure,surf(doppler_axis,range_axis,RDM);
 ```
-![result](https://github.com/godloveliang/SFND-Radar-Target-Generation-and-Detection-/blob/master/img/2D_FFT.PNG)
+| ![2d_fft.png](figures/2d_fft.png) | 
+|:--:| 
+| *Figure 2. 2D FFT* |
 
 #### 5. 2D CFAR
-Implement the 2D CFAR process on the output of 2D FFT operation, i.e the Range Doppler Map.
+Implement the 2D CFAR process on the output of the previous 2D FFT operation, resulting in the Range Doppler Map.
 
-Determine the number of Training cells for each dimension. Similarly, pick the number of guard cells.
+Experimentally determine the number of Training cells and the number of Guard cells for each dimension. 
 
 ```Matlab
 %Select the number of Training Cells in both the dimensions.
@@ -155,7 +162,7 @@ Gd = 3;
 offset = 6;
 ```
 
-Create a vector to store the average noise level for each iteration on training cells，and a matrix for the final Range Doppler Map
+Create a vector to store the average noise level for each iteration on the training cells，and a matrix for the final Range Doppler Map.
 
 ```Matlab
 %Create a vector to store noise_level for each iteration on training cells
@@ -163,7 +170,7 @@ noise_level = zeros(1,1);
 RDM_final = zeros(size(RDM));
 ```
 
-Slide the cell under test (CUT) across the grid, leaving a margin for Training and Guard cells around the edges.
+Slide the cell under test (CUT) across the grid, leaving a margin for Training and Guard cells around the edges of the map.
 
 ```Matlab
 for m=(Tr+Gr+1):(Nr/2-(Tr+Gr))
@@ -173,7 +180,7 @@ for m=(Tr+Gr+1):(Nr/2-(Tr+Gr))
 end
 ```
 
-For each CUT, convert the signal from logarithmic to linear using the `db2pow` function, next sum the signal level within all the training cells, and get the mean value by dividing by the number of cells in the grid. Finally, convert the value back to db using pow2db.
+For each CUT, convert the signal from logarithmic to linear using the `db2pow` function, next sum the signal level within all the training cells, and get the mean value by dividing by the number of cells in the grid. Finally, convert the value back to db using `pow2db`.
 
 ```Matlab
         % get CUT
@@ -206,7 +213,7 @@ Next, compare the signal in CUT against this new noise level. If the signal is g
         end
 ```
 
-The process above will generate a thresholded block, which is smaller than the Range Doppler Map as the CUT cannot be located at the edges of matrix. Hence,few cells will not be thresholded. To keep the map size same set those values to 0. 
+The process above will generate a thresholded block, which is smaller than the Range Doppler Map as the CUT cannot be located at the edges of matrix. Hence, some cells will not be thresholded. To keep the map size same, I set those values to 0. 
 ```Matlab
  for m=(Tr+Gr+1):(Nr/2-(Tr+Gr))
     for n=(Td+Gd+1):(Nd-(Td+Gd))
@@ -218,6 +225,8 @@ The process above will generate a thresholded block, which is smaller than the R
 ```
 
 
-Number of training cells, number of guard cells and offset were selected by matching the image shared in walkthrough.
+The number of training cells, number of guard cells and offset were selected by matching the image shared in the walkthrough video.
 
-![result](https://github.com/godloveliang/SFND-Radar-Target-Generation-and-Detection-/blob/master/img/CA_CFAR.PNG)
+| ![rdm.png](figures/rdm.png) | 
+|:--:| 
+| *Figure 3. Range-Doppler Map* |
